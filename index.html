@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HRIS — Admin & Attendance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── same styles as before ── */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    :root {
+      --primary: #1a2a6c;
+      --primary-light: #2d4a8e;
+      --primary-dark: #0f1a4a;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f4f8;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-400: #94a3b8;
+      --gray-500: #64748b;
+      --gray-600: #475569;
+      --gray-700: #334155;
+      --gray-800: #1e293b;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.10);
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--gray-50);
+      min-height: 100vh;
+      color: var(--gray-800);
+    }
+    .app {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 20px 24px 40px;
+    }
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--gray-100);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--gray-300);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gray-400);
+    }
+    h1,
+    h2,
+    h3 {
+      letter-spacing: -0.02em;
+    }
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: #fff;
+      padding: 20px 28px;
+      border-radius: var(--radius);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: 0 4px 24px rgba(26, 42, 108, 0.25);
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-brand h1 {
+      font-size: 24px;
+      font-weight: 800;
+    }
+    .header-brand .badge {
+      background: rgba(255, 255, 255, 0.18);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .header-user {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .header-user .user-chip {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(4px);
+    }
+    .header-user .user-chip .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .header-user .admin-badge {
+      background: #f59e0b;
+      color: #1e293b;
+      padding: 2px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .btn-outline-light {
+      background: transparent;
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-outline-light:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.7);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin: 28px 0 24px;
+    }
+    .stat-card {
+      background: #fff;
+      padding: 18px 20px;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-200);
+      box-shadow: var(--shadow);
+      transition: transform 0.15s;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+    .stat-card .num {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .stat-card .label {
+      font-size: 13px;
+      color: var(--gray-500);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+    .stat-card .num.green {
+      color: var(--success);
+    }
+    .stat-card .num.purple {
+      color: var(--purple);
+    }
+    .stat-card .num.yellow {
+      color: var(--warning);
+    }
+    .stat-card .num.red {
+      color: var(--danger);
+    }
+    .card {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-200);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .card-header h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--gray-800);
+    }
+    .card-body {
+      padding: 22px 24px;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 820px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+    .attendance-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 480px) {
+      .attendance-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .btn-attend {
+      padding: 14px 16px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #fff;
+    }
+    .btn-attend:active {
+      transform: scale(0.97);
+    }
+    .btn-attend:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-checkin {
+      background: var(--success);
+    }
+    .btn-checkin:hover:not(:disabled) {
+      background: #059669;
+    }
+    .btn-checkout {
+      background: var(--warning);
+    }
+    .btn-checkout:hover:not(:disabled) {
+      background: #d97706;
+    }
+    .btn-break {
+      background: var(--purple);
+    }
+    .btn-break:hover:not(:disabled) {
+      background: #7c3aed;
+    }
+    .btn-absent {
+      background: var(--danger);
+    }
+    .btn-absent:hover:not(:disabled) {
+      background: #dc2626;
+    }
+    .btn-reset {
+      background: var(--gray-300);
+      color: var(--gray-700);
+    }
+    .btn-reset:hover:not(:disabled) {
+      background: var(--gray-400);
+    }
+    .today-status {
+      background: var(--gray-50);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      border: 1px solid var(--gray-200);
+    }
+    .today-status .left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .today-status .label {
+      font-size: 14px;
+      color: var(--gray-500);
+    }
+    .today-status .value {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .today-status .time {
+      font-size: 14px;
+      color: var(--gray-500);
+    }
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 14px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .badge-status.in {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .badge-status.out {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .badge-status.break {
+      background: #ede9fe;
+      color: #5b21b6;
+    }
+    .badge-status.absent {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    thead {
+      background: var(--gray-50);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    th {
+      text-align: left;
+      padding: 12px 14px;
+      font-weight: 600;
+      color: var(--gray-600);
+      border-bottom: 1px solid var(--gray-200);
+    }
+    td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    tr:hover td {
+      background: var(--gray-50);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--gray-400);
+    }
+    .empty-state .icon {
+      font-size: 40px;
+      margin-bottom: 8px;
+    }
+    .empty-state h4 {
+      color: var(--gray-600);
+      margin-bottom: 2px;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .filters input,
+    .filters select {
+      padding: 8px 14px;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fff;
+      flex: 1 1 140px;
+      min-width: 120px;
+    }
+    .filters input:focus,
+    .filters select:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(45, 74, 142, 0.10);
+    }
+    .btn-sm {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .btn-sm:active {
+      transform: scale(0.97);
+    }
+    .btn-primary-sm {
+      background: var(--primary-light);
+      color: #fff;
+    }
+    .btn-primary-sm:hover {
+      background: var(--primary);
+    }
+    .btn-ghost-sm {
+      background: var(--gray-100);
+      color: var(--gray-600);
+    }
+    .btn-ghost-sm:hover {
+      background: var(--gray-200);
+    }
+    .btn-success-sm {
+      background: var(--success);
+      color: #fff;
+    }
+    .btn-success-sm:hover {
+      background: #059669;
+    }
+    .btn-danger-sm {
+      background: var(--danger);
+      color: #fff;
+    }
+    .btn-danger-sm:hover {
+      background: #dc2626;
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      max-width: 480px;
+      width: 100%;
+      padding: 32px 28px;
+      animation: modalIn 0.25s ease;
+      box-shadow: var(--shadow-lg);
+    }
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: scale(0.96) translateY(-16px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    .modal h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 4px;
+    }
+    .modal .sub {
+      color: var(--gray-500);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    .modal .field {
+      margin-bottom: 16px;
+    }
+    .modal .field label {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--gray-700);
+      margin-bottom: 4px;
+    }
+    .modal .field input,
+    .modal .field select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fff;
+    }
+    .modal .field input:focus,
+    .modal .field select:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(45, 74, 142, 0.10);
+    }
+    .modal .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .modal .actions .btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .modal .actions .btn:active {
+      transform: scale(0.97);
+    }
+    .modal .actions .btn-primary {
+      background: var(--primary-light);
+      color: #fff;
+    }
+    .modal .actions .btn-primary:hover {
+      background: var(--primary);
+    }
+    .modal .actions .btn-ghost {
+      background: var(--gray-100);
+      color: var(--gray-600);
+    }
+    .modal .actions .btn-ghost:hover {
+      background: var(--gray-200);
+    }
+    .modal .add-link {
+      font-size: 14px;
+      color: var(--primary-light);
+      cursor: pointer;
+      font-weight: 500;
+      margin-top: 12px;
+      display: inline-block;
+    }
+    .modal .add-link:hover {
+      text-decoration: underline;
+    }
+    .toast-container {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 400px;
+      width: 100%;
+    }
+    .toast {
+      padding: 14px 22px;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 14px;
+      color: #fff;
+      box-shadow: var(--shadow-lg);
+      animation: slideIn 0.35s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toast-success {
+      background: var(--success);
+    }
+    .toast-error {
+      background: var(--danger);
+    }
+    .toast-warning {
+      background: var(--warning);
+    }
+    .toast-info {
+      background: var(--primary-light);
+    }
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    .mt-2 {
+      margin-top: 16px;
+    }
+    .flex-center {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .text-muted {
+      color: var(--gray-400);
+    }
+    .text-sm {
+      font-size: 13px;
+    }
+    .hidden {
+      display: none !important;
+    }
+    .gap-2 {
+      gap: 8px;
+    }
+    .flex-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .admin-panel {
+      background: #fef9e7;
+      border: 1px solid #fde68a;
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-top: 20px;
+    }
+    .admin-panel h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 10px;
+    }
+    .admin-panel .admin-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    @media (max-width: 600px) {
+      .app {
+        padding: 12px 12px 30px;
+      }
+      .header {
+        padding: 16px 20px;
+      }
+      .header-brand h1 {
+        font-size: 19px;
+      }
+      .header-brand .badge {
+        font-size: 10px;
+        padding: 2px 10px;
+      }
+      .card-header,
+      .card-body {
+        padding: 14px 16px;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .stat-card {
+        padding: 14px 16px;
+      }
+      .stat-card .num {
+        font-size: 22px;
+      }
+      .today-status {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+      }
+      .today-status .left {
+        justify-content: center;
+      }
+      .modal {
+        padding: 24px 20px;
+      }
+    }
+    @media (max-width: 400px) {
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .attendance-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ─── HEADER ─── -->
+  <header class="header">
+    <div class="header-brand">
+      <h1>🏢 HRIS</h1>
+      <span class="badge">Attendance</span>
+    </div>
+    <div class="header-user">
+      <span class="user-chip" id="userChip">
+        <span class="avatar">👤</span>
+        <span id="userNameDisplay">Not logged in</span>
+      </span>
+      <span id="adminBadge" class="admin-badge hidden">👑 Admin</span>
+      <button class="btn-outline-light" id="loginBtn" onclick="openLoginModal()">🔑 Login</button>
+      <button class="btn-outline-light hidden" id="logoutBtn" onclick="logout()">🚪 Logout</button>
+    </div>
+  </header>
+
+  <!-- ─── STATS ─── -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card"><div class="num green" id="statIn">0</div><div class="label">✅ Checked In</div></div>
+    <div class="stat-card"><div class="num purple" id="statBreak">0</div><div class="label">☕ On Break</div></div>
+    <div class="stat-card"><div class="num yellow" id="statOut">0</div><div class="label">📤 Checked Out</div></div>
+    <div class="stat-card"><div class="num red" id="statAbsent">0</div><div class="label">❌ Absent</div></div>
+  </div>
+
+  <!-- ─── TWO COLUMN ─── -->
+  <div class="two-col">
+
+    <div class="card">
+      <div class="card-header">
+        <h2>📋 Mark Attendance</h2>
+        <span class="text-muted text-sm" id="todayDateLabel"></span>
+      </div>
+      <div class="card-body">
+        <div class="today-status">
+          <div class="left">
+            <span class="label">Today's Status</span>
+            <span class="value" id="todayStatusValue">—</span>
+          </div>
+          <span class="time" id="todayTimeValue">--:--</span>
+        </div>
+
+        <div class="attendance-grid">
+          <button class="btn-attend btn-checkin" id="btnCheckIn" onclick="markAttendance('checked-in')">✅ Check In</button>
+          <button class="btn-attend btn-checkout" id="btnCheckOut" onclick="markAttendance('checked-out')">📤 Check Out</button>
+          <button class="btn-attend btn-break" id="btnBreak" onclick="markAttendance('on-break')">☕ Break</button>
+          <button class="btn-attend btn-absent" id="btnAbsent" onclick="markAttendance('absent')">❌ Absent</button>
+        </div>
+
+        <div class="flex-wrap mt-2">
+          <button class="btn-sm btn-ghost-sm" onclick="resetToday()">🔄 Reset Today</button>
+        </div>
+
+        <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--gray-200); font-size:13px; color:var(--gray-500);">
+          ⚡ <span id="loginHint">Please log in to mark attendance</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>📊 Today's Records</h2>
+        <button class="btn-sm btn-success-sm" onclick="exportToday()">📤 Export</button>
+      </div>
+      <div class="card-body" style="padding:0;">
+        <div class="table-wrap" style="max-height:380px;">
+          <table>
+            <thead><tr><th>Employee</th><th>Status</th><th>Time</th></tr></thead>
+            <tbody id="todayTableBody">
+              <tr><td colspan="3" class="empty-state"><div class="icon">📭</div><h4>No records today</h4></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ADMIN PANEL ─── -->
+  <div id="adminPanel" class="admin-panel hidden">
+    <h3>👑 Admin Controls</h3>
+    <div class="admin-grid">
+      <button class="btn-sm btn-primary-sm" onclick="addEmployee()">➕ Add Employee</button>
+      <button class="btn-sm btn-danger-sm" onclick="removeEmployee()">➖ Remove Employee</button>
+      <button class="btn-sm btn-ghost-sm" onclick="refreshEmployeeList()">🔄 Refresh Employees</button>
+      <button class="btn-sm btn-ghost-sm" onclick="viewAllRecords()">📋 View All Records</button>
+      <button class="btn-sm btn-ghost-sm" onclick="clearHistory()">🗑️ Clear All History</button>
+    </div>
+    <div style="margin-top:10px; font-size:13px; color:var(--gray-600);">
+      <span id="employeeCount">0</span> employees registered.
+    </div>
+  </div>
+
+  <!-- ─── HISTORY ─── -->
+  <div style="margin-top:28px;">
+    <div class="card">
+      <div class="card-header">
+        <h2>📈 Attendance History</h2>
+        <div class="flex-wrap gap-2">
+          <button class="btn-sm btn-primary-sm" onclick="exportHistory()">📤 Export All</button>
+          <button class="btn-sm btn-ghost-sm" onclick="clearHistory()">🗑️ Clear All</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="filters">
+          <input type="text" id="historySearch" placeholder="Search employee…" oninput="renderHistory()" />
+          <select id="historyStatusFilter" onchange="renderHistory()">
+            <option value="all">All Status</option>
+            <option value="checked-in">Checked In</option>
+            <option value="checked-out">Checked Out</option>
+            <option value="on-break">On Break</option>
+            <option value="absent">Absent</option>
+          </select>
+          <input type="date" id="historyDateFilter" onchange="renderHistory()" />
+          <button class="btn-sm btn-ghost-sm" onclick="clearFilters()">Clear</button>
+        </div>
+        <div class="table-wrap" style="max-height:420px;">
+          <table>
+            <thead><tr><th>Employee</th><th>Status</th><th>Date</th><th>Time</th></tr></thead>
+            <tbody id="historyTableBody">
+              <tr><td colspan="4" class="empty-state"><div class="icon">📭</div><h4>No history yet</h4></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:30px; text-align:center; font-size:13px; color:var(--gray-400); border-top:1px solid var(--gray-200); padding-top:20px;">
+    HRIS Attendance System &bull; Data stored locally &bull; <span id="recordCount">0</span> records
+  </div>
+</div>
+
+<!-- ─── LOGIN MODAL ─── -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <h2>🔑 Login</h2>
+    <div class="sub">Enter your employee credentials</div>
+    <div class="field">
+      <label for="loginEmployee">Employee</label>
+      <select id="loginEmployee"><option value="">— Select —</option></select>
+    </div>
+    <div class="field">
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" placeholder="Enter your password" />
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="login()">✅ Login</button>
+      <button class="btn btn-ghost" onclick="closeLoginModal()">Cancel</button>
+    </div>
+    <div style="margin-top:14px; font-size:14px;">
+      <span class="add-link" onclick="showRegister()">➕ New employee? Register here</span>
+    </div>
+    <div id="registerSection" class="hidden" style="margin-top:16px; padding-top:16px; border-top:1px solid var(--gray-200);">
+      <div class="field">
+        <label for="regName">Full Name</label>
+        <input type="text" id="regName" placeholder="e.g. Jane Doe" />
+      </div>
+      <div class="field">
+        <label for="regPassword">Set Password</label>
+        <input type="password" id="regPassword" placeholder="Min 4 characters" />
+      </div>
+      <button class="btn btn-primary" onclick="register()" style="width:100%;padding:12px;">➕ Register</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOAST CONTAINER ─── -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  // ========================================================================
+  //  DATA LAYER — persistent localStorage
+  // ========================================================================
+
+  const KEYS = {
+    employees: 'hris_employees_v2',
+    attendance: 'hris_attendance_v2',
+    session: 'hris_session_v2'
+  };
+
+  function getEmployees() {
+    try { return JSON.parse(localStorage.getItem(KEYS.employees)) || []; } catch { return []; }
+  }
+
+  function saveEmployees(list) {
+    localStorage.setItem(KEYS.employees, JSON.stringify(list));
+  }
+
+  function getAttendance() {
+    try { return JSON.parse(localStorage.getItem(KEYS.attendance)) || []; } catch { return []; }
+  }
+
+  function saveAttendance(list) {
+    localStorage.setItem(KEYS.attendance, JSON.stringify(list));
+    document.getElementById('recordCount').textContent = list.length;
+  }
+
+  function getSession() {
+    try { return JSON.parse(localStorage.getItem(KEYS.session)); } catch { return null; }
+  }
+
+  function saveSession(s) {
+    localStorage.setItem(KEYS.session, JSON.stringify(s));
+  }
+
+  function clearSession() {
+    localStorage.removeItem(KEYS.session);
+  }
+
+  // ========================================================================
+  //  HELPERS
+  // ========================================================================
+
+  function today() { return new Date().toISOString().split('T')[0]; }
+
+  function nowISO() { return new Date().toISOString(); }
+
+  function fmtTime(iso) {
+    if (!iso) return '--:--';
+    const d = new Date(iso);
+    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function fmtDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function getStatusDisplay(status) {
+    const map = {
+      'checked-in': { label: '✅ Checked In', cls: 'in' },
+      'checked-out': { label: '📤 Checked Out', cls: 'out' },
+      'on-break': { label: '☕ On Break', cls: 'break' },
+      'absent': { label: '❌ Absent', cls: 'absent' }
+    };
+    return map[status] || { label: '❓ Unknown', cls: '' };
+  }
+
+  function getTodayRecord(employee) {
+    return getAttendance().find(r => r.employee === employee && r.date === today());
+  }
+
+  function getEmployeeStatus(employee) {
+    const rec = getTodayRecord(employee);
+    return rec ? rec.status : null;
+  }
+
+  function isAdmin(user) {
+    return user === 'Admin';
+  }
+
+  // ========================================================================
+  //  SESSION
+  // ========================================================================
+
+  let currentUser = null;
+
+  function loadSession() {
+    const s = getSession();
+    if (s && s.employee) {
+      const employees = getEmployees();
+      if (employees.some(e => e.name === s.employee)) {
+        currentUser = s.employee;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function saveSessionUser(name) {
+    currentUser = name;
+    saveSession({ employee: name });
+  }
+
+  function clearSessionUser() {
+    currentUser = null;
+    clearSession();
+  }
+
+  // ========================================================================
+  //  AUTH
+  // ========================================================================
+
+  function login() {
+    const select = document.getElementById('loginEmployee');
+    const name = select.value;
+    const pass = document.getElementById('loginPassword').value.trim();
+
+    if (!name) { showToast('Please select an employee', 'warning'); return; }
+    if (!pass) { showToast('Please enter your password', 'warning'); return; }
+
+    const employees = getEmployees();
+    const emp = employees.find(e => e.name === name);
+    if (!emp) { showToast('Employee not found', 'error'); return; }
+    if (emp.password !== pass) { showToast('Incorrect password', 'error'); return; }
+
+    saveSessionUser(name);
+    closeLoginModal();
+    showToast(`👋 Welcome${isAdmin(name) ? ' Admin' : ''}, ${name}!`, 'success');
+    refreshUI();
+  }
+
+  function register() {
+    const name = document.getElementById('regName').value.trim();
+    const pass = document.getElementById('regPassword').value.trim();
+
+    if (!name) { showToast('Please enter a name', 'warning'); return; }
+    if (pass.length < 4) { showToast('Password must be at least 4 characters', 'warning'); return; }
+
+    const employees = getEmployees();
+    if (employees.some(e => e.name === name)) {
+      showToast('Employee already exists', 'error');
+      return;
+    }
+
+    employees.push({ name, password: pass, joined: today() });
+    saveEmployees(employees);
+    document.getElementById('regName').value = '';
+    document.getElementById('regPassword').value = '';
+    populateLoginSelect();
+    showToast(`✅ Registered ${name}! You can now log in.`, 'success');
+    document.getElementById('registerSection').classList.add('hidden');
+  }
+
+  function logout() {
+    if (confirm('Logout?')) {
+      clearSessionUser();
+      refreshUI();
+      showToast('👋 Logged out', 'info');
+    }
+  }
+
+  function showRegister() {
+    document.getElementById('registerSection').classList.toggle('hidden');
+  }
+
+  // ========================================================================
+  //  ADMIN FUNCTIONS
+  // ========================================================================
+
+  function addEmployee() {
+    const name = prompt('Enter new employee name:');
+    if (!name || !name.trim()) return;
+    const trimmed = name.trim();
+    const employees = getEmployees();
+    if (employees.some(e => e.name === trimmed)) {
+      showToast('Employee already exists', 'warning');
+      return;
+    }
+    const pass = prompt('Set password for ' + trimmed + ':');
+    if (pass === null) return;
+    if (pass.trim().length < 4) { showToast('Password must be at least 4 chars', 'warning'); return; }
+    employees.push({ name: trimmed, password: pass.trim(), joined: today() });
+    saveEmployees(employees);
+    populateLoginSelect();
+    refreshUI();
+    showToast(`✅ Added ${trimmed}`, 'success');
+  }
+
+  function removeEmployee() {
+    const employees = getEmployees();
+    if (employees.length === 0) { showToast('No employees to remove', 'warning'); return; }
+    const names = employees.map(e => e.name).join('\n');
+    const toRemove = prompt('Enter the exact name of the employee to remove:\n\n' + names);
+    if (!toRemove) return;
+    const trimmed = toRemove.trim();
+    const idx = employees.findIndex(e => e.name === trimmed);
+    if (idx === -1) { showToast('Employee not found', 'error'); return; }
+    if (trimmed === 'Admin') { showToast('Cannot remove Admin account', 'error'); return; }
+    if (!confirm(`Remove ${trimmed} and all their attendance records?`)) return;
+    employees.splice(idx, 1);
+    saveEmployees(employees);
+    let records = getAttendance();
+    records = records.filter(r => r.employee !== trimmed);
+    saveAttendance(records);
+    if (currentUser === trimmed) logout();
+    else refreshUI();
+    populateLoginSelect();
+    showToast(`🗑️ Removed ${trimmed}`, 'info');
+  }
+
+  function refreshEmployeeList() {
+    populateLoginSelect();
+    refreshUI();
+    showToast('🔄 Employee list refreshed', 'info');
+  }
+
+  function viewAllRecords() {
+    document.getElementById('historySearch').value = '';
+    document.getElementById('historyStatusFilter').value = 'all';
+    document.getElementById('historyDateFilter').value = '';
+    renderHistory();
+    showToast('📋 Showing all records', 'info');
+  }
+
+  // ========================================================================
+  //  UI: Login Modal
+  // ========================================================================
+
+  function populateLoginSelect() {
+    const select = document.getElementById('loginEmployee');
+    const employees = getEmployees();
+    select.innerHTML = '<option value="">— Select —</option>' +
+      employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+  }
+
+  function openLoginModal() {
+    populateLoginSelect();
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginModal').classList.add('active');
+  }
+
+  function closeLoginModal() {
+    document.getElementById('loginModal').classList.remove('active');
+    document.getElementById('registerSection').classList.add('hidden');
+  }
+
+  document.getElementById('loginModal').addEventListener('click', function(e) {
+    if (e.target === this) closeLoginModal();
+  });
+
+  document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') login();
+  });
+
+  // ========================================================================
+  //  ATTENDANCE ACTIONS
+  // ========================================================================
+
+  function markAttendance(status) {
+    if (!currentUser) { showToast('Please log in first', 'warning'); openLoginModal(); return; }
+
+    const todayStr = today();
+    const records = getAttendance();
+    const existing = records.findIndex(r => r.employee === currentUser && r.date === todayStr);
+    const currentStatus = existing !== -1 ? records[existing].status : null;
+
+    if (status === 'checked-in' && currentStatus === 'checked-in') {
+      showToast('Already checked in today', 'warning');
+      return;
+    }
+    if (status === 'checked-out' && currentStatus !== 'checked-in' && currentStatus !== 'on-break') {
+      showToast('You must check in first before checking out', 'warning');
+      return;
+    }
+    if (status === 'on-break' && currentStatus !== 'checked-in') {
+      showToast('You must be checked in to take a break', 'warning');
+      return;
+    }
+    if (status === 'absent' && currentStatus === 'absent') {
+      showToast('Already marked absent', 'warning');
+      return;
+    }
+
+    const record = { employee: currentUser, date: todayStr, status: status, timestamp: nowISO() };
+
+    if (existing !== -1) {
+      records[existing] = { ...records[existing], ...record };
+    } else {
+      records.push(record);
+    }
+
+    saveAttendance(records);
+    showToast(`✅ ${currentUser} marked as ${status.replace('-', ' ')}`, 'success');
+    refreshUI();
+  }
+
+  function resetToday() {
+    if (!currentUser) { showToast('Please log in first', 'warning'); return; }
+    if (!confirm(`Reset today's attendance for ${currentUser}?`)) return;
+
+    const records = getAttendance();
+    const filtered = records.filter(r => !(r.employee === currentUser && r.date === today()));
+    saveAttendance(filtered);
+    showToast(`🔄 Reset today for ${currentUser}`, 'info');
+    refreshUI();
+  }
+
+  // ========================================================================
+  //  EXPORT & CLEAR
+  // ========================================================================
+
+  function downloadCSV(content, filename) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  function exportToday() {
+    const records = getAttendance().filter(r => r.date === today());
+    if (!records.length) { showToast('No records today', 'warning'); return; }
+    let csv = 'Employee,Status,Date,Time\n';
+    records.forEach(r => {
+      const d = getStatusDisplay(r.status);
+      csv += `${r.employee},"${d.label}",${fmtDate(r.date)},${fmtTime(r.timestamp)}\n`;
+    });
+    downloadCSV(csv, `attendance_${today()}.csv`);
+    showToast('📤 Exported today\'s records', 'success');
+  }
+
+  function exportHistory() {
+    const records = getAttendance();
+    if (!records.length) { showToast('No records to export', 'warning'); return; }
+    let csv = 'Employee,Status,Date,Time\n';
+    records.forEach(r => {
+      const d = getStatusDisplay(r.status);
+      csv += `${r.employee},"${d.label}",${fmtDate(r.date)},${fmtTime(r.timestamp)}\n`;
+    });
+    downloadCSV(csv, `attendance_history_${today()}.csv`);
+    showToast('📤 Exported all records', 'success');
+  }
+
+  function clearHistory() {
+    if (!confirm('⚠️ Delete ALL attendance records? This cannot be undone.')) return;
+    saveAttendance([]);
+    showToast('🗑️ All records cleared', 'info');
+    refreshUI();
+  }
+
+  // ========================================================================
+  //  RENDER
+  // ========================================================================
+
+  function updateHeader() {
+    const nameEl = document.getElementById('userNameDisplay');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const adminBadge = document.getElementById('adminBadge');
+
+    if (currentUser) {
+      nameEl.textContent = currentUser;
+      loginBtn.classList.add('hidden');
+      logoutBtn.classList.remove('hidden');
+      document.getElementById('loginHint').textContent = `Logged in as ${currentUser}`;
+      adminBadge.classList.toggle('hidden', !isAdmin(currentUser));
+    } else {
+      nameEl.textContent = 'Not logged in';
+      loginBtn.classList.remove('hidden');
+      logoutBtn.classList.add('hidden');
+      document.getElementById('loginHint').textContent = 'Please log in to mark attendance';
+      adminBadge.classList.add('hidden');
+    }
+
+    const panel = document.getElementById('adminPanel');
+    if (currentUser && isAdmin(currentUser)) {
+      panel.classList.remove('hidden');
+      document.getElementById('employeeCount').textContent = getEmployees().length;
+    } else {
+      panel.classList.add('hidden');
+    }
+  }
+
+  function updateStats() {
+    const records = getAttendance().filter(r => r.date === today());
+    const employees = getEmployees();
+    const recorded = new Set(records.map(r => r.employee));
+
+    let inCount = 0, breakCount = 0, outCount = 0, absentCount = 0;
+    records.forEach(r => {
+      if (r.status === 'checked-in') inCount++;
+      else if (r.status === 'on-break') breakCount++;
+      else if (r.status === 'checked-out') outCount++;
+      else if (r.status === 'absent') absentCount++;
+    });
+    absentCount += employees.filter(e => !recorded.has(e.name)).length;
+
+    document.getElementById('statIn').textContent = inCount;
+    document.getElementById('statBreak').textContent = breakCount;
+    document.getElementById('statOut').textContent = outCount;
+    document.getElementById('statAbsent').textContent = absentCount;
+  }
+
+  function updateTodayStatus() {
+    const valEl = document.getElementById('todayStatusValue');
+    const timeEl = document.getElementById('todayTimeValue');
+
+    if (!currentUser) {
+      valEl.textContent = '—';
+      timeEl.textContent = '--:--';
+      return;
+    }
+
+    const rec = getTodayRecord(currentUser);
+    if (rec) {
+      const d = getStatusDisplay(rec.status);
+      valEl.textContent = d.label;
+      timeEl.textContent = fmtTime(rec.timestamp);
+    } else {
+      valEl.textContent = 'Not marked';
+      timeEl.textContent = '--:--';
+    }
+  }
+
+  function updateTodayTable() {
+    const tbody = document.getElementById('todayTableBody');
+    const records = getAttendance().filter(r => r.date === today());
+
+    if (!records.length) {
+      tbody.innerHTML = `<tr><td colspan="3" class="empty-state"><div class="icon">📭</div><h4>No records today</h4></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = records
+      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+      .map(r => {
+        const d = getStatusDisplay(r.status);
+        return `<tr><td><strong>${r.employee}</strong></td><td><span class="badge-status ${d.cls}">${d.label}</span></td><td>${fmtTime(r.timestamp)}</td></tr>`;
+      }).join('');
+  }
+
+  function renderHistory() {
+    const search = document.getElementById('historySearch').value.toLowerCase();
+    const statusFilter = document.getElementById('historyStatusFilter').value;
+    const dateFilter = document.getElementById('historyDateFilter').value;
+
+    let records = getAttendance();
+    if (search) records = records.filter(r => r.employee.toLowerCase().includes(search));
+    if (statusFilter !== 'all') records = records.filter(r => r.status === statusFilter);
+    if (dateFilter) records = records.filter(r => r.date === dateFilter);
+
+    const tbody = document.getElementById('historyTableBody');
+
+    if (!records.length) {
+      tbody.innerHTML = `<tr><td colspan="4" class="empty-state"><div class="icon">📭</div><h4>No matching records</h4></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = records
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, 300)
+      .map(r => {
+        const d = getStatusDisplay(r.status);
+        return `<tr><td><strong>${r.employee}</strong></td><td><span class="badge-status ${d.cls}">${d.label}</span></td><td>${fmtDate(r.date)}</td><td>${fmtTime(r.timestamp)}</td></tr>`;
+      }).join('');
+  }
+
+  function updateButtons() {
+    const btns = ['btnCheckIn', 'btnCheckOut', 'btnBreak', 'btnAbsent'];
+    const disabled = !currentUser;
+    btns.forEach(id => document.getElementById(id).disabled = disabled);
+
+    if (currentUser) {
+      const status = getEmployeeStatus(currentUser);
+      document.getElementById('btnCheckIn').disabled = status === 'checked-in';
+      document.getElementById('btnCheckOut').disabled = status !== 'checked-in' && status !== 'on-break';
+      document.getElementById('btnBreak').disabled = status === 'absent' || status === 'checked-out';
+      document.getElementById('btnAbsent').disabled = status === 'absent';
+    }
+  }
+
+  function updateDateLabel() {
+    document.getElementById('todayDateLabel').textContent = fmtDate(nowISO());
+  }
+
+  function refreshUI() {
+    updateHeader();
+    updateStats();
+    updateTodayStatus();
+    updateTodayTable();
+    renderHistory();
+    updateButtons();
+    updateDateLabel();
+    document.getElementById('recordCount').textContent = getAttendance().length;
+  }
+
+  function clearFilters() {
+    document.getElementById('historySearch').value = '';
+    document.getElementById('historyStatusFilter').value = 'all';
+    document.getElementById('historyDateFilter').value = '';
+    renderHistory();
+  }
+
+  // ========================================================================
+  //  TOAST
+  // ========================================================================
+
+  function showToast(msg, type) {
+    type = type || 'info';
+    const container = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = `toast toast-${type}`;
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(() => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateX(30px)';
+      el.style.transition = 'all 0.3s ease';
+      setTimeout(() => el.remove(), 400);
+    }, 3000);
+  }
+
+  // ========================================================================
+  //  KEYBOARD SHORTCUTS
+  // ========================================================================
+
+  document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'l') { e.preventDefault();
+      openLoginModal(); }
+    if (e.key === 'Escape') { closeLoginModal(); }
+  });
+
+  // ========================================================================
+  //  INIT
+  // ========================================================================
+
+  const defaultEmployees = [
+    { name: 'Admin', password: 'admin123', joined: today() },
+    { name: 'Alice Johnson', password: 'alice123', joined: today() },
+    { name: 'Bob Smith', password: 'bob123', joined: today() },
+    { name: 'Carol Davis', password: 'carol123', joined: today() },
+    { name: 'David Wilson', password: 'david123', joined: today() },
+    { name: 'Emma Brown', password: 'emma123', joined: today() }
+  ];
+
+  if (getEmployees().length === 0) {
+    saveEmployees(defaultEmployees);
+  } else {
+    const employees = getEmployees();
+    if (!employees.some(e => e.name === 'Admin')) {
+      employees.push({ name: 'Admin', password: 'admin123', joined: today() });
+      saveEmployees(employees);
+    }
+  }
+
+  if (loadSession()) { /* session restored */ }
+
+  refreshUI();
+  setInterval(refreshUI, 60000);
+
+  console.log('🏢 HRIS Attendance System loaded');
+  console.log('🔑 Admin login: Admin / admin123');
+  console.log('🔑 Press Ctrl+L to open login');
+</script>
+</body>
+</html>
